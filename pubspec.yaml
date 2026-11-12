@@ -1,0 +1,18 @@
+name: app_auth
+description: Gemeinsame Nutzerverwaltung (Anmeldung, Registrierung, Passwort, E-Mail, Cloud-Sync) für alle Apps von Carsten Rösner.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+  flutter: '>=3.24.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  supabase_flutter: ^2.8.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
