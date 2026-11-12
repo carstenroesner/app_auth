@@ -10,7 +10,7 @@ void main() {
     final store = CloudStore(auth, appId: 'test');
     expect(store.active, isFalse);
     expect(await store.load('k'), isNull);
-    expect(await store.save('k', '{}'), isFalse);
+    expect(await store.save('k', '{}'), isNull);
     expect(() => auth.signIn('a@b.de', 'x'), throwsA(isA<AuthFailure>()));
   });
 

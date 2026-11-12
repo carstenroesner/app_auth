@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import 'auth_service.dart';
 
 /// Ein gespeicherter Wert mit Zeitpunkt der letzten Änderung auf dem Server.
@@ -24,8 +22,9 @@ class CloudStore {
 
   bool get active => auth.available && auth.loggedIn;
 
-  /// Liest einen Wert; `null`, wenn nicht angemeldet, nichts gespeichert oder
-  /// der Server nicht erreichbar ist.
+  /// Liest einen Wert; `null`, wenn nicht angemeldet oder nichts gespeichert
+  /// ist. Ist der Server nicht erreichbar, wirft die Methode [AuthFailure],
+  /// damit Apps nicht fälschlich "leer" annehmen und Daten überschreiben.
   Future<CloudEntry?> load(String key) async {
     if (!active) return null;
     try {
@@ -38,31 +37,34 @@ class CloudStore {
       if (row == null) return null;
       return CloudEntry(
         jsonEncode(row['value']),
-        DateTime.parse(row['updated_at'] as String),
+        DateTime.parse(row['updated_at'] as String).toUtc(),
       );
-    } on PostgrestException {
-      return null;
     } catch (_) {
-      return null;
+      throw const AuthFailure('Der Abgleich ist gerade nicht möglich.');
     }
   }
 
-  /// Schreibt einen Wert (muss gültiges JSON sein). `true` bei Erfolg.
-  Future<bool> save(String key, String json) async {
-    if (!active) return false;
+  /// Schreibt einen Wert (muss gültiges JSON sein). Gibt den Änderungszeitpunkt
+  /// auf dem Server zurück, bei Fehlern oder ohne Anmeldung `null`.
+  Future<DateTime?> save(String key, String json) async {
+    if (!active) return null;
     try {
-      await auth.client.from('user_data').upsert(
-        {
-          'user_id': auth.userId,
-          'app': appId,
-          'key': key,
-          'value': jsonDecode(json),
-        },
-        onConflict: 'user_id,app,key',
-      );
-      return true;
+      final row = await auth.client
+          .from('user_data')
+          .upsert(
+            {
+              'user_id': auth.userId,
+              'app': appId,
+              'key': key,
+              'value': jsonDecode(json),
+            },
+            onConflict: 'user_id,app,key',
+          )
+          .select('updated_at')
+          .single();
+      return DateTime.parse(row['updated_at'] as String).toUtc();
     } catch (_) {
-      return false;
+      return null;
     }
   }
 }
