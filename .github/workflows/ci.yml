@@ -12,5 +12,7 @@ jobs:
         with:
           channel: stable
       - run: flutter pub get
-      - run: flutter analyze
+      - name: Analyse
+        run: |
+          flutter analyze > analyze.txt 2>&1 || { grep -E '(error|warning|info) ' analyze.txt | head -30 | while read -r l; do echo "::error::$l"; done; exit 1; }
       - run: flutter test
