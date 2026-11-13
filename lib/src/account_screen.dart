@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import 'app_catalog.dart';
 import 'auth_service.dart';
-
-/// Öffnet den Konto-Bildschirm der Nutzerverwaltung.
-Future<void> openAccountScreen(BuildContext context, AuthService auth, {String appName = 'diese App'}) {
-  return Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => AccountScreen(auth: auth, appName: appName)),
-  );
-}
 
 enum _Mode { login, register, forgot }
 
 /// Anmelden, Registrieren, Passwort vergessen, E-Mail und Passwort ändern.
 class AccountScreen extends StatefulWidget {
-  const AccountScreen({super.key, required this.auth, this.appName = 'diese App'});
+  const AccountScreen({
+    super.key,
+    required this.auth,
+    this.appName = 'diese App',
+    this.showApps = false,
+    this.returnUrl,
+  });
 
   final AuthService auth;
   final String appName;
+
+  /// Zeigt die Liste der angebundenen Apps (für das zentrale Konto-Portal).
+  final bool showApps;
+
+  /// Adresse der App, von der der Nutzer kam (nur eigene Apps erlaubt).
+  final String? returnUrl;
 
   @override
   State<AccountScreen> createState() => _AccountScreenState();
@@ -127,6 +134,7 @@ class _AccountScreenState extends State<AccountScreen> {
                     _accountView(context)
                   else
                     _loginForm(context),
+                  if (widget.showApps) ..._appsSection(context),
                   if (_error != null) ...[
                     const SizedBox(height: 16),
                     Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
@@ -142,6 +150,36 @@ class _AccountScreenState extends State<AccountScreen> {
         },
       ),
     );
+  }
+
+  List<Widget> _appsSection(BuildContext context) {
+    final back = isAllowedReturnUrl(widget.returnUrl) ? widget.returnUrl! : null;
+    final theme = Theme.of(context);
+    return [
+      if (back != null) ...[
+        const SizedBox(height: 16),
+        OutlinedButton.icon(
+          icon: const Icon(Icons.arrow_back),
+          label: const Text('Zurück zur App'),
+          onPressed: () => launchUrl(Uri.parse(back), webOnlyWindowName: '_self'),
+        ),
+      ],
+      const Divider(height: 40),
+      Text('Deine Apps', style: theme.textTheme.titleMedium),
+      const SizedBox(height: 4),
+      Text(auth.loggedIn
+          ? 'Du bist angemeldet und kannst alle Apps nutzen.'
+          : 'Alle Apps lassen sich auch ohne Konto nutzen, dann bleiben die Daten auf diesem Gerät.'),
+      const SizedBox(height: 8),
+      for (final app in appCatalog)
+        ListTile(
+          contentPadding: EdgeInsets.zero,
+          title: Text(app.name),
+          subtitle: Text(app.description),
+          trailing: const Icon(Icons.open_in_new),
+          onTap: () => launchUrl(Uri.parse(app.url), webOnlyWindowName: '_self'),
+        ),
+    ];
   }
 
   Widget _notice(BuildContext context, String text) {

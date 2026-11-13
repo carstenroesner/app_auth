@@ -9,6 +9,10 @@ const String appAuthSupabaseUrl = 'https://vzcjmqvegtxgkbvtparo.supabase.co';
 const String appAuthPublishableKey =
     'sb_publishable_j-qJDT5X-dkurcDcmwvG-w_m6BlrdeO';
 
+/// Adresse des zentralen Konto-Portals. Alle Links in Mails (Bestätigung,
+/// Passwort vergessen, E-Mail ändern) führen dorthin.
+const String accountPortalUrl = 'https://carstenroesner.github.io/konto/';
+
 /// Fehler mit einer für Nutzer lesbaren deutschen Meldung.
 class AuthFailure implements Exception {
   const AuthFailure(this.message);
@@ -69,12 +73,8 @@ class AuthService extends ChangeNotifier {
     return c;
   }
 
-  /// Adresse, auf die Links in Mails zurückführen (die aufrufende App).
-  String? get _redirect {
-    if (!kIsWeb) return null;
-    final base = Uri.base;
-    return Uri(scheme: base.scheme, host: base.host, port: base.hasPort ? base.port : null, path: base.path).toString();
-  }
+  /// Adresse, auf die Links in Mails zurückführen: das zentrale Konto-Portal.
+  String? get _redirect => kIsWeb ? accountPortalUrl : null;
 
   Future<T> _run<T>(Future<T> Function() action) async {
     try {

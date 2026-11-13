@@ -19,4 +19,17 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: AccountScreen(auth: auth, appName: 'Testapp')));
     expect(find.textContaining('arbeitet weiter lokal'), findsOneWidget);
   });
+
+  testWidgets('App-Konto ohne Server nennt lokalen Betrieb', (tester) async {
+    final auth = AuthService.offline();
+    await tester.pumpWidget(MaterialApp(home: AppAccountScreen(auth: auth, appName: 'Testapp')));
+    expect(find.textContaining('arbeitet weiter lokal'), findsOneWidget);
+  });
+
+  test('Rücksprung nur zu eigenen Apps', () {
+    expect(isAllowedReturnUrl('https://carstenroesner.github.io/prompt_arena/'), isTrue);
+    expect(isAllowedReturnUrl('https://evil.example.com/'), isFalse);
+    expect(isAllowedReturnUrl('javascript:alert(1)'), isFalse);
+    expect(isAllowedReturnUrl(null), isFalse);
+  });
 }
