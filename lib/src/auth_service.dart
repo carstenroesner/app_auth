@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'user_profile.dart';
+
 /// Zentrale Verbindungsdaten. Der publishable Key ist öffentlich vorgesehen,
 /// der Schutz der Daten hängt an Row Level Security in der Datenbank.
 const String appAuthSupabaseUrl = 'https://vzcjmqvegtxgkbvtparo.supabase.co';
@@ -34,6 +36,8 @@ class AuthService extends ChangeNotifier {
   final SupabaseClient? _client;
   StreamSubscription<AuthState>? _sub;
   bool _recovery = false;
+  UserProfile _profile = const UserProfile();
+  String? _profileFor;
 
   /// Startet die Verbindung. Fehler führen zu `AuthService.offline()`.
   static Future<AuthService> init() async {
@@ -44,6 +48,7 @@ class AuthService extends ChangeNotifier {
       );
       final service = AuthService._(Supabase.instance.client);
       service._listen();
+      service._syncProfile();
       return service;
     } catch (_) {
       return AuthService.offline();
@@ -53,9 +58,13 @@ class AuthService extends ChangeNotifier {
   void _listen() {
     _sub = _client!.auth.onAuthStateChange.listen((state) {
       if (state.event == AuthChangeEvent.passwordRecovery) _recovery = true;
+      _syncProfile();
       notifyListeners();
     }, onError: (_) {});
   }
+
+  /// Name und Bild des angemeldeten Nutzers (leer, solange nichts geladen ist).
+  UserProfile get profile => _profile;
 
   bool get available => _client != null;
   User? get user => _client?.auth.currentUser;
@@ -75,6 +84,55 @@ class AuthService extends ChangeNotifier {
 
   /// Adresse, auf die Links in Mails zurückführen: das zentrale Konto-Portal.
   String? get _redirect => kIsWeb ? accountPortalUrl : null;
+
+  /// Lädt das Profil, sobald ein anderer Nutzer angemeldet ist, und leert es
+  /// beim Abmelden.
+  void _syncProfile() {
+    final id = userId;
+    if (id == _profileFor) return;
+    _profileFor = id;
+    _profile = const UserProfile();
+    if (id != null) unawaited(_loadProfile(id));
+  }
+
+  Future<void> _loadProfile(String id) async {
+    try {
+      final row = await client
+          .from('user_data')
+          .select('value')
+          .eq('app', 'account')
+          .eq('key', 'profile')
+          .maybeSingle();
+      if (_profileFor != id) return;
+      if (row != null) {
+        _profile = UserProfile.fromJson(row['value']);
+        notifyListeners();
+      }
+    } catch (_) {
+      // Ohne Profil bleibt die Anzeige bei der E-Mail-Adresse.
+    }
+  }
+
+  /// Speichert Name und Bild; sie gelten damit in allen Apps.
+  Future<void> saveProfile(UserProfile profile) => _run(() async {
+        final id = userId;
+        if (id == null) throw const AuthFailure('Bitte zuerst anmelden.');
+        await client.from('user_data').upsert(
+          {
+            'user_id': id,
+            'app': 'account',
+            'key': 'profile',
+            'value': profile.toJson(),
+          },
+          onConflict: 'user_id,app,key',
+        );
+        _profile = UserProfile(
+          firstName: profile.firstName.trim(),
+          lastName: profile.lastName.trim(),
+          avatar: profile.avatar,
+        );
+        notifyListeners();
+      });
 
   Future<T> _run<T>(Future<T> Function() action) async {
     try {

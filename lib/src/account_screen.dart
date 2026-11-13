@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'app_catalog.dart';
 import 'auth_service.dart';
+import 'profile_editor.dart';
 
 enum _Mode { login, register, forgot }
 
@@ -267,11 +268,11 @@ class _AccountScreenState extends State<AccountScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Angemeldet', style: Theme.of(context).textTheme.headlineSmall),
+        ProfileHeader(auth: auth),
         const SizedBox(height: 8),
-        SelectableText(auth.email ?? ''),
-        const SizedBox(height: 4),
         const Text('Deine Daten werden gesichert und zwischen deinen Geräten abgeglichen.'),
+        const Divider(height: 32),
+        ProfileEditor(auth: auth),
         const Divider(height: 32),
         Text('E-Mail-Adresse ändern', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),

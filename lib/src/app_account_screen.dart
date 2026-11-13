@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'auth_service.dart';
+import 'profile_editor.dart';
 
 /// Konto-Bildschirm innerhalb einer App: zeigt den Anmeldestatus und führt
 /// zum zentralen Konto-Portal, wo Anmeldung und Kontoverwaltung stattfinden.
@@ -50,8 +51,8 @@ class AppAccountScreen extends StatelessWidget {
             button = '';
           } else if (auth.loggedIn) {
             title = 'Angemeldet';
-            text = '${auth.email ?? ''}\n\nDeine Daten werden gesichert und zwischen deinen Geräten abgeglichen. Die Anmeldung gilt in allen deinen Apps.';
-            button = 'Konto verwalten';
+            text = 'Deine Daten werden gesichert und zwischen deinen Geräten abgeglichen. Die Anmeldung gilt in allen deinen Apps.';
+            button = 'Profil und Konto verwalten';
           } else {
             title = 'Nicht angemeldet';
             text = 'Ohne Anmeldung bleiben alle Daten nur auf diesem Gerät. Mit einem Konto werden sie gesichert und auf allen deinen Geräten abgeglichen. Das Konto gilt für alle deine Apps.';
@@ -63,6 +64,10 @@ class AppAccountScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.all(20),
                 children: [
+                  if (auth.available && auth.loggedIn) ...[
+                    ProfileHeader(auth: auth),
+                    const SizedBox(height: 16),
+                  ],
                   Text(title, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 12),
                   SelectableText(text),

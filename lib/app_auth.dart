@@ -6,8 +6,11 @@
 /// App automatisch an.
 library;
 
+export 'src/account_avatar.dart';
 export 'src/account_screen.dart';
 export 'src/app_account_screen.dart';
 export 'src/app_catalog.dart';
 export 'src/auth_service.dart';
 export 'src/cloud_store.dart';
+export 'src/profile_editor.dart';
+export 'src/user_profile.dart';
