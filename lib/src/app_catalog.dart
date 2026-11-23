@@ -14,6 +14,11 @@ const List<AppEntry> appCatalog = [
     'https://carstenroesner.github.io/prompt_arena/',
     'Prompts verwalten, sortieren und zwischen Geräten abgleichen.',
   ),
+  AppEntry(
+    'Tanita Anzeige',
+    'https://carstenroesner.github.io/tanita_anzeige/',
+    'Analysedaten der Tanita-Waage anzeigen und zwischen Geräten abgleichen.',
+  ),
 ];
 
 /// Nur Adressen der eigenen Apps (gleiche Herkunft wie das Portal) sind als
