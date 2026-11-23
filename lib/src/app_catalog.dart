@@ -19,6 +19,26 @@ const List<AppEntry> appCatalog = [
     'https://carstenroesner.github.io/tanita_anzeige/',
     'Analysedaten der Tanita-Waage anzeigen und zwischen Geräten abgleichen.',
   ),
+  AppEntry(
+    'GC Winterberg Birdie Book',
+    'https://carstenroesner.github.io/gc-winterberg-birdie-book/',
+    'Digitales Birdie Book für den 9-Loch-Turnierplatz des GC Winterberg.',
+  ),
+  AppEntry(
+    'SprayTattoo Katalog',
+    'https://carstenroesner.github.io/spraytattoo_katalog/',
+    'Katalog für Spraytattoo-Vorlagen mit Wunschliste und Bestell-Ablauf.',
+  ),
+  AppEntry(
+    'Point & Click Adventure',
+    'https://carstenroesner.github.io/pack/',
+    'Eigene Engine für ein Point-and-Click-Adventure im SCUMM-Stil.',
+  ),
+  AppEntry(
+    'Spook',
+    'https://carstenroesner.github.io/spook/',
+    'Flutter-Projekt (in Arbeit).',
+  ),
 ];
 
 /// Nur Adressen der eigenen Apps (gleiche Herkunft wie das Portal) sind als

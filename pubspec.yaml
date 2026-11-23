@@ -1,6 +1,6 @@
 name: app_auth
 description: Gemeinsame Nutzerverwaltung (Anmeldung, Registrierung, Passwort, E-Mail, Cloud-Sync) für alle Apps von Carsten Rösner.
-version: 0.2.0
+version: 0.2.1
 publish_to: none
 
 environment:
